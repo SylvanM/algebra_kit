@@ -8,14 +8,10 @@ use std::ops::{Add, Neg, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssi
 
 // MARK: Ring
 
-/**
- * An algebraic ring
- */
+/// An algebraic Ring
 pub trait Ring: Debug + PartialEq + Copy + Sized + Add<Self> + AddAssign<Self> + Neg + Sub<Self> + SubAssign<Self> + Mul<Self> + MulAssign<Self> + Mul<Output = Self> + Add<Output = Self> + Neg<Output = Self> + Sub<Output = Self> {
 
-	/**
-	 * The multiplicative identity of this ring
-	 */
+	/// The multiplicative identity of this ring
 	fn one() -> Self;
 
 	/**
@@ -45,6 +41,55 @@ pub trait InnerProductSpace<R: Ring> {
 
 pub trait NormSpace {
 	fn norm(self) -> f64;
+}
+
+// MARK: Euclidean Domain
+
+pub trait EuclideanDomain: Ring {
+
+	fn size(self) -> usize;
+
+	/**
+	 * Finds q and r such that 
+	 *
+	 * self = divisor * q + r
+	 */
+	fn quotient_and_remainder(self, divisor: Self) -> (Self, Self);
+}
+
+/// Returns (g, x, y) so that 
+/// - g = gcd(a, b)
+/// ax + by = gcd(a, b)
+pub fn ext_gcd<R: EuclideanDomain>(a: R, b: R) -> (R, R, R) {
+
+	if a == R::zero() {
+		return (b, R::zero(), R::one())
+	}
+
+	let (q, r) = b.quotient_and_remainder(a);
+
+	let (g, x1, y1) = ext_gcd(r, a);
+
+	let x = y1 - q * x1;
+	let y = x1;
+
+	(g, x, y)
+}
+
+/**
+ * Euclidean Algorithm
+ */
+pub fn gcd<R: EuclideanDomain>(a: R, b: R) -> R {
+	if a == R::zero() {
+		b
+	} else if b == R::zero() {
+		a
+	} else if a.size() < b.size() {
+		gcd(b, a)
+	} else {
+		let (_, r) = a.quotient_and_remainder(b);
+		gcd(b, r)
+	}
 }
 
 // MARK: Implementations
@@ -317,24 +362,17 @@ impl<const Q: i64> Ring for ZM<Q> {
 // 	}
 // }
 
-/// Returns (g, x, y) so that 
-/// - g = gcd(a, b)
-/// ax + by = gcd(a, b)
-pub fn ext_gcd(a: i64, b: i64) -> (i64, i64, i64) {
-
-	if a == 0 {
-		return (b, 0, 1)
+impl EuclideanDomain for i64 {
+	fn size(self) -> usize {
+		self.abs().try_into().unwrap()
 	}
 
-	let (g, x1, y1) = ext_gcd(b % a, a);
-
-	let x = y1 - (b/a) * x1;
-	let y = x1;
-
-	(g, x, y)
+	fn quotient_and_remainder(self, divisor: Self) -> (Self, Self) {
+		(self / divisor, self & divisor)
+	}
 }
 
-pub fn mod_inv(x: i64, m: i64) -> i64 {
+pub fn mod_inv<R: EuclideanDomain>(x: R, m: R) -> R {
 	match ext_gcd(x, m) { (_, i, _) => i }
 }
 
