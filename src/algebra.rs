@@ -47,7 +47,9 @@ pub trait NormSpace {
 
 pub trait EuclideanDomain: Ring {
 
-	fn size(self) -> usize;
+	type SizeType: Ord;
+
+	fn size(self) -> Self::SizeType;
 
 	/**
 	 * Finds q and r such that 
@@ -363,6 +365,8 @@ impl<const Q: i64> Ring for ZM<Q> {
 // }
 
 impl EuclideanDomain for i64 {
+	type SizeType = usize;
+
 	fn size(self) -> usize {
 		self.abs().try_into().unwrap()
 	}
