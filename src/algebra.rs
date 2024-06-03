@@ -14,15 +14,14 @@ pub trait Ring: Debug + Clone + PartialEq + Sized + Add<Self> + AddAssign<Self> 
 	/// The multiplicative identity of this ring
 	fn one() -> Self;
 
-	/**
-	 * The additive identity of this ring
-	 */
-	 fn zero() -> Self;
+	/// The additive identity of this ring/
+	fn zero() -> Self;
 
-	/**
-	 * A ring element raised to a power
-	 */
-   	fn power(self, n: i64) -> Self;
+	/// Whether or not this ring element is zero
+	fn is_zero(&self) -> bool;
+
+	/// A ring element raised to a power/
+   	fn power(&self, n: i64) -> Self;
 }
 
 // MARK: Field
@@ -31,16 +30,19 @@ pub trait Ring: Debug + Clone + PartialEq + Sized + Add<Self> + AddAssign<Self> 
  * A field, which is a ring where every nonzero element has a multiplicative inverse
  */
 pub trait Field: Ring + Div + DivAssign + Div<Output = Self> {
-	fn inverse(self) -> Self;
+	fn inverse(&self) -> Self;
 }
 
 // MARK: Inner Product Space
 pub trait InnerProductSpace<R: Ring> {
-	fn inner_product(self, other: Self) -> R;
+	fn inner_product(&self, other: Self) -> R;
 }
 
 pub trait NormSpace {
-	fn norm(self) -> f64;
+
+	type NormType: Ord;
+
+	fn norm(&self) -> Self::NormType;
 }
 
 // MARK: Euclidean Domain
@@ -52,14 +54,14 @@ pub trait EuclideanDomain: Ring {
 	/// The Euclidean Size of this type. This is the size function 
 	/// associated with a euclidean domain. I'm avoiding calling it "size"
 	/// because often that function name is already used for other properties.
-	fn euc_size(self) -> Self::SizeType;
+	fn euc_size(&self) -> Self::SizeType;
 
 	/**
 	 * Finds q and r such that 
 	 *
 	 * self = divisor * q + r
 	 */
-	fn quotient_and_remainder(self, divisor: Self) -> (Self, Self);
+	fn quotient_and_remainder(&self, divisor: &Self) -> (Self, Self);
 }
 
 /// Returns (g, x, y) so that 
@@ -71,7 +73,7 @@ pub fn ext_gcd<R: EuclideanDomain>(a: R, b: R) -> (R, R, R) {
 		return (b, R::zero(), R::one())
 	}
 
-	let (q, r) = b.quotient_and_remainder(a.clone());
+	let (q, r) = b.quotient_and_remainder(&a);
 
 	let (g, x1, y1) = ext_gcd(r, a);
 
@@ -80,19 +82,17 @@ pub fn ext_gcd<R: EuclideanDomain>(a: R, b: R) -> (R, R, R) {
 	(g, x, x1)
 }
 
-/**
- * Euclidean Algorithm
- */
-pub fn gcd<R: EuclideanDomain>(a: R, b: R) -> R {
-	if a == R::zero() {
-		b
-	} else if b == R::zero() {
-		a
-	} else if a.clone().euc_size() < b.clone().euc_size() {
+/// The Euclidean Algorithm to find the GCD of two elements in a Euclidean Domain
+pub fn gcd<R: EuclideanDomain>(a: &R, b: &R) -> R {
+	if a.is_zero() {
+		b.clone()
+	} else if b.is_zero() {
+		a.clone()
+	} else if a.euc_size() < b.euc_size() {
 		gcd(b, a)
 	} else {
-		let (_, r) = a.quotient_and_remainder(b.clone());
-		gcd(b, r)
+		let (_, r) = a.quotient_and_remainder(b);
+		gcd(b, &r)
 	}
 }
 
@@ -103,18 +103,22 @@ impl Ring for f64 {
 		1.0
 	}
 
+	fn is_zero(&self) -> bool {
+		*self == 0.0
+	}
+
 	fn zero() -> Self {
 		0.0
 	}
 
-	fn power(self, n: i64) -> Self {
+	fn power(&self, n: i64) -> Self {
 		self.powf(n as f64)
 	}
 }
 
 impl Field for f64 {
-	fn inverse(self) -> Self {
-		if self == 0.0 {
+	fn inverse(&self) -> Self {
+		if self.is_zero() {
 			panic!("Cannot divide by zero")
 		} else {
 			1.0 / self
@@ -132,14 +136,18 @@ impl Ring for f32 {
 		0.0
 	}
 
-	fn power(self, n: i64) -> Self {
+	fn is_zero(&self) -> bool {
+		*self == 0.0
+	}
+
+	fn power(&self, n: i64) -> Self {
 		self.powf(n as f32)
 	}
 }
 
 impl Field for f32 {
-	fn inverse(self) -> Self {
-		if self == 0.0 {
+	fn inverse(&self) -> Self {
+		if self.is_zero() {
 			panic!("Cannot divide by zero")
 		} else {
 			1.0 / self
@@ -148,6 +156,7 @@ impl Field for f32 {
 }
 
 impl Ring for i8 {
+	
 	fn one() -> Self {
 		1
 	}
@@ -156,12 +165,17 @@ impl Ring for i8 {
 		0
 	}
 
-	fn power(self, n: i64) -> Self {
+	fn is_zero(&self) -> bool {
+		*self == 0
+	}
+
+	fn power(&self, n: i64) -> Self {
 		if n < 0 {
 			panic!("Cannot invert ring element")
 		}
 		self.pow(n as u32)
 	}
+	
 }
 
 impl Ring for i16 {
@@ -173,11 +187,15 @@ impl Ring for i16 {
 		0
 	}
 
-	fn power(self, n: i64) -> Self {
+	fn power(&self, n: i64) -> Self {
 		if n < 0 {
 			panic!("Cannot invert ring element")
 		}
 		self.pow(n as u32)
+	}
+	
+	fn is_zero(&self) -> bool {
+		*self == 0
 	}
 }
 
@@ -190,7 +208,11 @@ impl Ring for i32 {
 		0
 	}
 
-	fn power(self, n: i64) -> Self {
+	fn is_zero(&self) -> bool {
+		*self == 0
+	}
+
+	fn power(&self, n: i64) -> Self {
 		if n < 0 {
 			panic!("Cannot invert ring element")
 		}
@@ -207,7 +229,11 @@ impl Ring for i64 {
 		0
 	}
 
-	fn power(self, n: i64) -> Self {
+	fn is_zero(&self) -> bool {
+		*self == 0
+	}
+
+	fn power(&self, n: i64) -> Self {
 		if n < 0 {
 			panic!("Cannot invert ring element")
 		}
@@ -224,7 +250,11 @@ impl Ring for i128 {
 		0
 	}
 
-	fn power(self, n: i64) -> Self {
+	fn is_zero(&self) -> bool {
+		*self == 0
+	}
+
+	fn power(&self, n: i64) -> Self {
 		if n < 0 {
 			panic!("Cannot invert ring element")
 		}
@@ -348,33 +378,31 @@ impl<const Q: i64> Ring for ZM<Q> {
 		ZM::<Q> { val: 0 }
 	}
 
-	fn power(self, n: i64) -> Self {
+	fn is_zero(&self) -> bool {
+		self.val == 0
+	}
+
+	fn power(&self, n: i64) -> Self {
 		// TODO: Make this WAYY more efficient... Double and add, yeah?
 		let mut power = ZM::<Q>::one();
 
 		for _ in 1..=n {
-			power *= self
+			power *= *self
 		}
 
 		power
 	}
 }
 
-// impl<const Q: i64> ZM<Q> {
-// 	fn rnd() -> ZM<Q> {
-// 		ZM::<Q> { val: StdRng::from_entropy().gen::<i64>().rem_euclid(Q) }
-// 	}
-// }
-
 impl EuclideanDomain for i64 {
 	type SizeType = usize;
 
-	fn euc_size(self) -> usize {
+	fn euc_size(&self) -> usize {
 		self.abs().try_into().unwrap()
 	}
 
-	fn quotient_and_remainder(self, divisor: Self) -> (Self, Self) {
-		(self / divisor, self & divisor)
+	fn quotient_and_remainder(&self, divisor: &Self) -> (Self, Self) {
+		(self / divisor, self % divisor)
 	}
 }
 
@@ -397,7 +425,7 @@ impl<const Q: i64> DivAssign<ZM<Q>> for ZM<Q> {
 }
 
 impl<const Q: i64> Field for ZM<Q> {
-	fn inverse(self) -> Self {
+	fn inverse(&self) -> Self {
 		mod_inv(self.val, Q).into()
 	}
 }
