@@ -52,14 +52,14 @@ pub trait EuclideanDomain: Ring {
 	/// The Euclidean Size of this type. This is the size function 
 	/// associated with a euclidean domain. I'm avoiding calling it "size"
 	/// because often that function name is already used for other properties.
-	fn euc_size(&self) -> Self::SizeType;
+	fn euc_size(self) -> Self::SizeType;
 
 	/**
 	 * Finds q and r such that 
 	 *
 	 * self = divisor * q + r
 	 */
-	fn quotient_and_remainder(&self, divisor: Self) -> (Self, Self);
+	fn quotient_and_remainder(self, divisor: Self) -> (Self, Self);
 }
 
 /// Returns (g, x, y) so that 
@@ -88,7 +88,7 @@ pub fn gcd<R: EuclideanDomain>(a: R, b: R) -> R {
 		b
 	} else if b == R::zero() {
 		a
-	} else if a.euc_size() < b.euc_size() {
+	} else if a.clone().euc_size() < b.clone().euc_size() {
 		gcd(b, a)
 	} else {
 		let (_, r) = a.quotient_and_remainder(b.clone());
@@ -369,11 +369,11 @@ impl<const Q: i64> Ring for ZM<Q> {
 impl EuclideanDomain for i64 {
 	type SizeType = usize;
 
-	fn euc_size(&self) -> usize {
+	fn euc_size(self) -> usize {
 		self.abs().try_into().unwrap()
 	}
 
-	fn quotient_and_remainder(&self, divisor: Self) -> (Self, Self) {
+	fn quotient_and_remainder(self, divisor: Self) -> (Self, Self) {
 		(self / divisor, self & divisor)
 	}
 }
