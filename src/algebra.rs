@@ -9,7 +9,7 @@ use std::ops::{Add, Neg, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssi
 // MARK: Ring
 
 /// An algebraic Ring
-pub trait Ring: Debug + PartialEq + Copy + Sized + Add<Self> + AddAssign<Self> + Neg + Sub<Self> + SubAssign<Self> + Mul<Self> + MulAssign<Self> + Mul<Output = Self> + Add<Output = Self> + Neg<Output = Self> + Sub<Output = Self> {
+pub trait Ring: Debug + Clone + PartialEq + Sized + Add<Self> + AddAssign<Self> + Neg + Sub<Self> + SubAssign<Self> + Mul<Self> + MulAssign<Self> + Mul<Output = Self> + Add<Output = Self> + Neg<Output = Self> + Sub<Output = Self> {
 
 	/// The multiplicative identity of this ring
 	fn one() -> Self;
@@ -52,14 +52,14 @@ pub trait EuclideanDomain: Ring {
 	/// The Euclidean Size of this type. This is the size function 
 	/// associated with a euclidean domain. I'm avoiding calling it "size"
 	/// because often that function name is already used for other properties.
-	fn euc_size(self) -> Self::SizeType;
+	fn euc_size(&self) -> Self::SizeType;
 
 	/**
 	 * Finds q and r such that 
 	 *
 	 * self = divisor * q + r
 	 */
-	fn quotient_and_remainder(self, divisor: Self) -> (Self, Self);
+	fn quotient_and_remainder(&self, divisor: Self) -> (Self, Self);
 }
 
 /// Returns (g, x, y) so that 
@@ -71,14 +71,13 @@ pub fn ext_gcd<R: EuclideanDomain>(a: R, b: R) -> (R, R, R) {
 		return (b, R::zero(), R::one())
 	}
 
-	let (q, r) = b.quotient_and_remainder(a);
+	let (q, r) = b.quotient_and_remainder(a.clone());
 
 	let (g, x1, y1) = ext_gcd(r, a);
 
-	let x = y1 - q * x1;
-	let y = x1;
+	let x = y1 - q * x1.clone();
 
-	(g, x, y)
+	(g, x, x1)
 }
 
 /**
@@ -92,7 +91,7 @@ pub fn gcd<R: EuclideanDomain>(a: R, b: R) -> R {
 	} else if a.euc_size() < b.euc_size() {
 		gcd(b, a)
 	} else {
-		let (_, r) = a.quotient_and_remainder(b);
+		let (_, r) = a.quotient_and_remainder(b.clone());
 		gcd(b, r)
 	}
 }
@@ -370,11 +369,11 @@ impl<const Q: i64> Ring for ZM<Q> {
 impl EuclideanDomain for i64 {
 	type SizeType = usize;
 
-	fn euc_size(self) -> usize {
+	fn euc_size(&self) -> usize {
 		self.abs().try_into().unwrap()
 	}
 
-	fn quotient_and_remainder(self, divisor: Self) -> (Self, Self) {
+	fn quotient_and_remainder(&self, divisor: Self) -> (Self, Self) {
 		(self / divisor, self & divisor)
 	}
 }
