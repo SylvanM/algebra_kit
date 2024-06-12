@@ -39,7 +39,7 @@ pub trait InnerProductSpace<R: Ring> {
 
 pub trait NormSpace {
 
-	type NormType: Ord;
+	type NormType: PartialOrd;
 
 	fn norm(&self) -> Self::NormType;
 }
