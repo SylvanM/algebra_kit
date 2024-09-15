@@ -5,6 +5,18 @@
 use std::fmt::Debug;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 
+// MARK: Group
+
+pub trait Group: Debug + Clone + PartialEq + Sized + Mul<Self> + MulAssign<Self> + Mul<Output = Self> + Div<Self> + DivAssign<Self> + Div<Output = Self> {
+	
+	/// The group identity element
+	fn identity() -> Self;
+
+	/// The inverse of a group element
+	fn inverse(&self) -> Self;
+
+}
+
 // MARK: Ring
 
 /// An algebraic Ring

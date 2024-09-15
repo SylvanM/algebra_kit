@@ -1,8 +1,101 @@
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use std::fmt::Debug;
-use std::ops::{Add, Neg, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
 
 use crate::algebra::*;
+
+// MARK: Groups
+
+/// The additive group of the integers modulo an integer N
+#[derive(Clone, Copy, Default, Debug)]
+pub struct AdditiveGroupZM<const N: i64> {
+	pub val: i64
+}
+
+impl<const N: i64> Add for AdditiveGroupZM<N> {
+	type Output = Self;
+
+	fn add(self, rhs: Self) -> Self::Output {
+		AdditiveGroupZM { val: (self.val + rhs.val).rem_euclid(N) }
+	}
+}
+
+impl<const N: i64> AddAssign for AdditiveGroupZM<N> {
+	fn add_assign(&mut self, rhs: Self) {
+		self.val -= rhs.val;
+		self.val = self.val.rem_euclid(N);
+	}
+}
+
+impl<const N: i64> Neg for AdditiveGroupZM<N> {
+	type Output = Self;
+
+	fn neg(self) -> Self::Output {
+		AdditiveGroupZM { val: (-self.val).rem_euclid(N) }
+	}
+}
+
+impl<const N: i64> Sub for AdditiveGroupZM<N> {
+	type Output = Self;
+
+	fn sub(self, rhs: Self) -> Self::Output {
+		AdditiveGroupZM { val: (self.val - rhs.val).rem_euclid(N) }
+	}
+}
+
+impl<const N: i64> SubAssign for AdditiveGroupZM<N> {
+	fn sub_assign(&mut self, rhs: Self) {
+		self.val -= rhs.val;
+		self.val = self.val.rem_euclid(N)
+	}
+}
+
+impl<const N: i64> Mul for AdditiveGroupZM<N> {
+	type Output = Self;
+
+	fn mul(self, rhs: Self) -> Self::Output {
+		self + rhs
+	}
+}
+
+impl<const N: i64> MulAssign for AdditiveGroupZM<N> {
+	fn mul_assign(&mut self, rhs: Self) {
+		*self += rhs
+	}
+}
+
+impl<const N: i64> Div for AdditiveGroupZM<N> {
+	type Output = Self;
+
+	fn div(self, rhs: Self) -> Self::Output {
+		AdditiveGroupZM { val: self.val - rhs.val }
+	}
+}
+
+impl<const N: i64> DivAssign for AdditiveGroupZM<N> {
+	fn div_assign(&mut self, rhs: Self) {
+		*self -= rhs
+	}
+}
+
+impl<const N: i64> PartialEq for AdditiveGroupZM<N> {
+	fn eq(&self, other: &Self) -> bool {
+		self.val.rem_euclid(N) == other.val.rem_euclid(N)
+	}
+}
+
+impl<const N: i64> Group for AdditiveGroupZM<N> {
+
+	fn identity() -> Self {
+		AdditiveGroupZM { val: 0 }
+	}
+
+	fn inverse(&self) -> Self {
+		-(*self)
+	}
+}
+
+// MARK: Rings and Fields
 
 impl Ring for f64 {
 	fn one() -> Self {
@@ -167,6 +260,8 @@ impl Ring for i128 {
 		self.pow(n as u32)
 	}
 }
+
+/// The field of integers modulo a HUGE prime Q
 
 /// The field of the integers modulo a prime Q
 #[derive(Clone, Copy, Default)]
