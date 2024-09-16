@@ -1,3 +1,4 @@
+use rand::rngs;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use std::fmt::Debug;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
@@ -93,6 +94,22 @@ impl<const N: i64> Group for AdditiveGroupZM<N> {
 	fn inverse(&self) -> Self {
 		-(*self)
 	}
+}
+
+impl<const N: i64> AdditiveGroupZM<N> {
+
+	/// Creates a group element in Z/(N) from the integer x
+	pub fn from_int(x: i64) -> AdditiveGroupZM<N> {
+		AdditiveGroupZM { val: x.rem_euclid(N) }
+	}
+
+	/// Generates a random group element
+	/// 
+	/// NOT cryptographically secure!
+	pub fn random() -> AdditiveGroupZM<N> {
+		AdditiveGroupZM { val: rand::thread_rng().gen_range(0..N) }
+	}
+
 }
 
 // MARK: Rings and Fields
