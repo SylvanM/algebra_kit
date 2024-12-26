@@ -11,7 +11,7 @@ use crate::algebra::*;
 #[derive(Clone, Copy, Default, Debug)]
 pub struct AdditiveGroupZM<const N: i64> {
 	pub val: i64
-}
+}							
 
 impl<const N: i64> Add for AdditiveGroupZM<N> {
 	type Output = Self;
@@ -132,6 +132,8 @@ impl Ring for f64 {
 	}
 }
 
+impl PoRing for f64 { /* f64 already satisfies this! */ }
+
 impl Field for f64 {
 	fn inverse(&self) -> Self {
 		if self.is_zero() {
@@ -141,6 +143,8 @@ impl Field for f64 {
 		}
 	}
 }
+
+impl PoField for f64 { }
 
 impl Ring for f32 {
 
@@ -161,6 +165,8 @@ impl Ring for f32 {
 	}
 }
 
+impl PoRing for f32 { /* f64 already satisfies this! */ }
+
 impl Field for f32 {
 	fn inverse(&self) -> Self {
 		if self.is_zero() {
@@ -170,6 +176,8 @@ impl Field for f32 {
 		}
 	}
 }
+
+impl PoField for f32 { /* f64 already satisfies this! */ }
 
 impl Ring for i8 {
 	
@@ -194,6 +202,8 @@ impl Ring for i8 {
 	
 }
 
+impl OrderedRing for i8 { }
+
 impl Ring for i16 {
 	fn one() -> Self {
 		1
@@ -214,6 +224,8 @@ impl Ring for i16 {
 		*self == 0
 	}
 }
+
+impl OrderedRing for i16 { }
 
 impl Ring for i32 {
 	fn one() -> Self {
@@ -236,6 +248,8 @@ impl Ring for i32 {
 	}
 }
 
+impl OrderedRing for i32 { }
+
 impl Ring for i64 {
 	fn one() -> Self {
 		1
@@ -257,6 +271,8 @@ impl Ring for i64 {
 	}
 }
 
+impl OrderedRing for i64 { }
+
 impl Ring for i128 {
 	fn one() -> Self {
 		1
@@ -277,6 +293,8 @@ impl Ring for i128 {
 		self.pow(n as u32)
 	}
 }
+
+impl OrderedRing for i128 { }
 
 /// The field of integers modulo a HUGE prime Q
 

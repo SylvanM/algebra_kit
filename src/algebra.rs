@@ -35,6 +35,12 @@ pub trait Ring: Debug + Clone + PartialEq + Sized + Add<Self> + AddAssign<Self> 
    	fn power(&self, n: i64) -> Self;
 }
 
+/// A partially ordered ring
+pub trait PoRing: Ring + PartialOrd { /* :) */ }
+
+/// A totally ordered ring
+pub trait OrderedRing: Ring + Ord { /* :) */ }
+
 // MARK: Field
 
 /**
@@ -43,6 +49,12 @@ pub trait Ring: Debug + Clone + PartialEq + Sized + Add<Self> + AddAssign<Self> 
 pub trait Field: Ring + Div + DivAssign + Div<Output = Self> {
 	fn inverse(&self) -> Self;
 }
+
+/// A partially ordered field
+pub trait PoField: Field + PartialOrd { /* :) */}
+
+/// A totally ordered field
+pub trait OrderedField: Field + Ord { /* :) */}
 
 // MARK: Inner Product Space
 pub trait InnerProductSpace<R: Ring> {
