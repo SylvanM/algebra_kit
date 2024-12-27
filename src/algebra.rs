@@ -39,7 +39,7 @@ pub trait Ring: Debug + Clone + PartialEq + Sized + Add<Self> + AddAssign<Self> 
 pub trait PoRing: Ring + PartialOrd { /* :) */ }
 
 /// A totally ordered ring
-pub trait OrderedRing: Ring + Ord { /* :) */ }
+pub trait OrderedRing: PoRing + Ord { /* :) */ }
 
 // MARK: Field
 
@@ -54,7 +54,7 @@ pub trait Field: Ring + Div + DivAssign + Div<Output = Self> {
 pub trait PoField: Field + PartialOrd { /* :) */}
 
 /// A totally ordered field
-pub trait OrderedField: Field + Ord { /* :) */}
+pub trait OrderedField: PoField + Ord { /* :) */}
 
 // MARK: Inner Product Space
 pub trait InnerProductSpace<R: Ring> {

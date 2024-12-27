@@ -202,6 +202,7 @@ impl Ring for i8 {
 	
 }
 
+impl PoRing for i8 { }
 impl OrderedRing for i8 { }
 
 impl Ring for i16 {
@@ -225,6 +226,7 @@ impl Ring for i16 {
 	}
 }
 
+impl PoRing for i16 { }
 impl OrderedRing for i16 { }
 
 impl Ring for i32 {
@@ -248,6 +250,7 @@ impl Ring for i32 {
 	}
 }
 
+impl PoRing for i32 { }
 impl OrderedRing for i32 { }
 
 impl Ring for i64 {
@@ -271,6 +274,7 @@ impl Ring for i64 {
 	}
 }
 
+impl PoRing for i64 { }
 impl OrderedRing for i64 { }
 
 impl Ring for i128 {
@@ -294,6 +298,7 @@ impl Ring for i128 {
 	}
 }
 
+impl PoRing for i128 { }
 impl OrderedRing for i128 { }
 
 /// The field of integers modulo a HUGE prime Q
