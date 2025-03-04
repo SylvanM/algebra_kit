@@ -1,6 +1,6 @@
 [package]
 name = "algebra_kit"
-version = "0.1.14"
+version = "0.1.15"
 edition = "2021"
 license = "GPL-3.0-or-later"
 description = "An abstract algebra library for Rust"
@@ -9,4 +9,5 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+num = "0.4.3"
 rand = "0.8.5"

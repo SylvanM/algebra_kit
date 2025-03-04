@@ -1,3 +1,4 @@
+use num::Zero;
 use rand::rngs;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use std::fmt::Debug;
@@ -136,7 +137,7 @@ impl PoRing for f64 { /* f64 already satisfies this! */ }
 
 impl Field for f64 {
 	fn inverse(&self) -> Self {
-		if self.is_zero() {
+		if num::Zero::is_zero(self) {
 			panic!("Cannot divide by zero")
 		} else {
 			1.0 / self
@@ -169,7 +170,7 @@ impl PoRing for f32 { /* f64 already satisfies this! */ }
 
 impl Field for f32 {
 	fn inverse(&self) -> Self {
-		if self.is_zero() {
+		if num::Zero::is_zero(self) {
 			panic!("Cannot divide by zero")
 		} else {
 			1.0 / self
@@ -468,5 +469,31 @@ impl<const Q: i64> DivAssign<ZM<Q>> for ZM<Q> {
 impl<const Q: i64> Field for ZM<Q> {
 	fn inverse(&self) -> Self {
 		mod_inv(self.val, Q).into()
+	}
+}
+
+// MARK: Complex Numbers
+
+impl Ring for num::Complex<f64> {
+	fn one() -> Self {
+		Self::ONE
+	}
+
+	fn zero() -> Self {
+		Self::ZERO
+	}
+
+	fn power(&self, n: i64) -> Self {
+		self.powi(n as i32)
+	}
+	
+	fn is_zero(&self) -> bool {
+		num::Zero::is_zero(self)
+	}
+}
+
+impl Field for num::Complex<f64> {
+	fn inverse(&self) -> Self {
+		self.inv()
 	}
 }
